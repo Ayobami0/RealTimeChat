@@ -2,17 +2,26 @@ import socket
 import threading
 import json
 from datetime import datetime
+import argparse
 
 from rich.console import Console
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-a", "--address", action="store")
+parser.add_argument("-p", "--port", action="store", type=int)
+
+args = parser.parse_args()
+
 console = Console()
 class Server:
-    def __init__(self, host: str='127.0.0.1', port: int=1234):
-        self.__HOST__ = host
-        self.__PORT__ = port
+    def __init__(self, host: str | None, port: int | None):
         self.__CONNECTION_LIMIT__ = 10
 
         self.__SERVER__ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.__HOST__ = self.__SERVER__.getsockname()[0] if not host else host
+        self.__PORT__ = self.__SERVER__.getsockname()[1] if not port else port
         self.__is_running__ = True
         self.__exit_event__ = threading.Event()
         
@@ -121,7 +130,8 @@ class Server:
 
 
 if __name__ == '__main__':
-    server = Server()
+    server = Server(args.address, args.port)
+
     try:
         server.start()
     except KeyboardInterrupt:

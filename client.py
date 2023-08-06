@@ -1,8 +1,16 @@
 import socket
 import threading
 import json
+import argparse
 
 from rich.console import Console
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-a", "--address", action="store")
+parser.add_argument("-p", "--port", action="store", type=int)
+
+args = parser.parse_args()
 
 console = Console()
 
@@ -12,7 +20,7 @@ class Client:
         self.__USERNAME__ = None
         self.__CON_STATUS__ = False
     
-    def connect(self, HOST: str='127.0.0.1', PORT: int=1234):
+    def connect(self, HOST, PORT):
         console.print(f"[yellow]\[CONNECTING] Connecting server on host {HOST} and port {PORT}")
         try:
             self.__CLIENT__.connect((HOST, PORT))
@@ -58,7 +66,7 @@ class Client:
                 else:
                     justify='left'
                 console.print(
-                    f"[blue]{username}: {message}",
+                    f"[blue bold]{username}[/][blue]: {message}",
                      justify=justify)
         except (socket.error, json.JSONDecodeError):
             console.print("[red]\[ERROR] Disconnected from the server.")
@@ -68,6 +76,7 @@ class Client:
         try:
             while True:
                 message = input("")
+                print("\033[A                             \033[A")
                 if message == "":
                     console.print("[red]\[ERROR] Message cannot be empty")
                 else:
@@ -90,4 +99,8 @@ class Client:
 
 
 if __name__ == '__main__':
-    Client().connect('0.tcp.eu.ngrok.io', 12436)    
+    if args.address is None or args.port is None:
+        console.print("[red]\[ERROR] Both the address and the port are required")
+        exit()
+    Client().connect(PORT=args.port, HOST=args.address)
+    # Client().connect('0.tcp.eu.ngrok.io', 12436)    
